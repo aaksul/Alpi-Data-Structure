@@ -6,6 +6,11 @@ TEST(linkedlistTest, InitialIterator) {
   EXPECT_EQ(lt.begin(), lt.end());
 }
 
+TEST(linkedlistTest, InitialIteratorAndIncerement) {
+  alpi::linked_list<int> lt{};
+  EXPECT_EQ(++lt.begin(), ++lt.end());
+}
+
 TEST(linkedlistTest, IteratorAfterElementAdd) {
   alpi::linked_list<int> lt{};
   lt.add(3);
@@ -25,9 +30,31 @@ TEST(linkedlistTest, IteratorIncrement) {
 }
 
 TEST(linkedlistTest, DereferenceIterator) {
-  alpi::linked_list<int> lt{1,2,3,4};
+  alpi::linked_list<int> lt{1, 2, 3, 4};
   auto it = lt.begin();
   it++; // 2
   it++; // 3
-  EXPECT_EQ(*it,3);
+  EXPECT_EQ(*it, 3);
+}
+
+template <typename T> bool IsInAscendingOrder(alpi::linked_list<T> lt) {
+
+  auto cur = lt.begin();
+  auto next = ++cur;
+
+  while (next != lt.end()) {
+    if (*cur > *next) {
+      return false;
+    }
+    cur++;
+    next++;
+  }
+  return true;
+}
+
+TEST(linkedlistTest, MergeTwoOrderedListByAscendingOrder) {
+  alpi::linked_list<int> lt{1, 2, 3, 4};
+  alpi::linked_list<int> lt2{5, 6, 7, 8, 9};
+  lt.merge(lt2);
+  EXPECT_PRED1(IsInAscendingOrder<int>, lt);
 }
