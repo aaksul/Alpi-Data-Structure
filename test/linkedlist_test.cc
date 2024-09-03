@@ -1,4 +1,5 @@
 #include "alpi/linked_list/linked_list.hpp"
+#include <iterator>
 #include <gtest/gtest.h>
 // Demonstrate some basic assertaions.
 TEST(linkedlistTest, InitialIterator) {
@@ -37,7 +38,27 @@ TEST(linkedlistTest, DereferenceIterator) {
   EXPECT_EQ(*it, 3);
 }
 
-template <typename T> bool IsInAscendingOrder(alpi::linked_list<T> lt) {
+TEST(linkedlistTest, CopyOperator) {
+  alpi::linked_list<int> lt2{1,5,6};
+  alpi::linked_list<int> lt{lt2};
+  auto begin_before_copy = lt.begin();
+  lt = lt2;
+  auto begin_after_copy = lt.begin();
+  EXPECT_EQ(*(begin_after_copy),*(lt2.begin()));
+  EXPECT_NE(begin_before_copy, begin_after_copy);
+}
+
+TEST(linkedlistTest, CopyAssignment) {
+  alpi::linked_list<int> lt{1,5,6};
+  alpi::linked_list<int> lt2{2,3,4};
+  auto begin_before_copy = lt.begin();
+  lt = lt2;
+  auto begin_after_copy = lt.begin();
+  EXPECT_EQ(*(begin_after_copy),*(lt2.begin()));
+  EXPECT_NE(begin_before_copy,begin_after_copy);
+}
+
+template <typename T> bool IsInAscendingOrder(const alpi::linked_list<T> lt) {
 
   auto cur = lt.begin();
   auto next = ++cur;

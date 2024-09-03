@@ -1,3 +1,5 @@
+#pragma once
+
 #include <initializer_list>
 #include <iostream>
 #include <memory>
@@ -22,6 +24,21 @@ public:
     for (auto el : list) {
       add(el);
     }
+  }
+
+  linked_list(const linked_list& other) {
+      for (auto el : other){
+        add(el);
+      }
+  }
+
+  linked_list& operator=(const linked_list& other) {
+      head_.reset();
+      tail_.reset();
+      for (auto el : other){
+        add(el);
+      }
+      return *this;
   }
 
   void add(const T &value) {
@@ -67,6 +84,38 @@ public:
   private:
     list_node *cur_;
   };
+  
+  struct const_iterator {
+
+    const_iterator(std::shared_ptr<list_node> node_ref) : cur_{node_ref.get()} {}
+
+    const_iterator operator++(int) { // left++
+      const_iterator old = *this;
+      ++(*this);
+      return old;
+    }
+
+    const_iterator& operator++() { // right
+      if (cur_ != nullptr) {
+        cur_ = cur_->next_.get();
+      }
+      return *this;
+    }
+    
+    const T& operator*() const { return cur_->value_; }
+
+    bool operator==(const const_iterator &other) const {
+      if (cur_ == other.cur_) {
+        return true;
+      }
+      return false;
+    }
+
+    bool operator!=(const const_iterator &other) const { return !(*this == other); }
+
+  private:
+    const list_node *cur_;
+  };
 
   void merge(linked_list &other) {
     node_ref ordered_pos{new list_node{T{}, nullptr}};
@@ -105,6 +154,8 @@ public:
 
   iterator begin();
   iterator end();
+  const_iterator begin() const;
+  const_iterator end() const;
 
 private:
   node_ref head_;
@@ -117,6 +168,18 @@ private:
 template <typename T>
 typename alpi::linked_list<T>::iterator alpi::linked_list<T>::begin() {
   return linked_list<T>::iterator(head_);
+}
+
+template <typename T>
+typename alpi::linked_list<T>::const_iterator alpi::linked_list<T>::begin() const {
+  return linked_list<T>::const_iterator(head_);
+}
+
+template <typename T>
+typename alpi::linked_list<T>::const_iterator alpi::linked_list<T>::end() const {
+  auto it = linked_list<T>::const_iterator(tail_);
+  it++;
+  return it;
 }
 
 template <typename T>
