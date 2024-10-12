@@ -3,6 +3,7 @@
 #include <initializer_list>
 #include <iostream>
 #include <memory>
+#include <iterator>
 
 namespace alpi {
 template <class T> class linked_list {
@@ -41,6 +42,12 @@ public:
       return *this;
   }
 
+  linked_list(linked_list&& other) = default;
+
+  linked_list& operator=(linked_list&& other) = default;
+
+  ~linked_list() = default;
+
   void add(const T &value) {
     node_ref new_node{new list_node{value, EOL_NODE}};
     if (head_ == nullptr && tail_ == nullptr) {
@@ -53,6 +60,8 @@ public:
   }
 
   struct iterator {
+
+    iterator() : cur_{nullptr} {}
 
     iterator(std::shared_ptr<list_node> node_ref) : cur_{node_ref.get()} {}
 

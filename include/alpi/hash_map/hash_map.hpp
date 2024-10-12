@@ -36,7 +36,15 @@ namespace alpi
 
     };
 
-    template<typename K,typename V>
+    template<typename T,typename R = size_t >
+    class hash{
+        R operator()(const T&){
+            // compute hash
+            return ;
+        }
+    };    
+
+    template<typename K,typename V,typename Hash = hash<K>>
     class hash_map
     {
     private:
@@ -50,7 +58,7 @@ namespace alpi
             return (key % size_);
         }
 
-        bool rehashing() { 
+        bool rehash() { 
             float load_factor = (float) bucket_num_ / (float) size_;
             if ( load_factor >= LIMIT_LOAD_FACTOR ){
                 hash_map<K,V> new_hash_map(nextPrimeNumber{}(size_*2));
@@ -68,17 +76,58 @@ namespace alpi
     public:
         hash_map(size_t size = 2) : buckets_(size), size_{size} {}
 
-        //hash_map(std::initializer_list<value_type> pairs) {}
-        
-        bool remove(const K& key) {return true;}
+        hash_map(const std::initializer_list<value_type>& pairs) {
+            std::for_each(pairs.begin(),pairs.end(),[&](const value_type& k_v){
+                this->insert(k_v.first,k_v.second);
+            });
+        }
 
-        bool search(const K& key) {return true;}
+        struct iterator {
+            iterator(hash_map<K,V>& hashmap) : buckets_it{hashmap.buckets_.begin()} {
+                while ( buckets_it->begin() == buckets_it->end() && buckets_it != hashmap.buckets_.end() ){
+                    buckets_it++;
+                }
+                bucket_it = buckets_it->begin();
+            }
+
+            iterator operator++(int){
+                iterator old = *this;
+                ++(*this);
+                return old;
+            }
+
+            iterator& operator++(){
+                if (bucket_it == buckets_it->end()){
+                    buckets_it++;
+                    while (buckets_it->begin() == buckets_it->end() ){
+                        buckets_it++;
+                    }
+                    bucket_it = buckets_it->begin();
+                } else {
+                    bucket_it++;
+                }
+                return *this;
+            }
+
+            value_type& operator*() {
+                return *bucket_it;
+            }
+
+            typename std::vector<bucket_t>::iterator buckets_it;
+            typename bucket_t::iterator bucket_it{};
+        };
+        
+        bool remove(const K& key) {
+            return true;
+        }
+
+        bool search(const K& key) {
+            return true;
+        }
 
         bool insert(const K& key,const V& value) {
             bucket_num_++;
-            if (rehashing()){
-                std::cout << "rehashing\n";
-            }
+            rehash();
             auto& bucket = buckets_[hash(key)];
             bucket.add(value_type{key,value});
             return true;    
@@ -94,6 +143,10 @@ namespace alpi
             std::terminate();
         }
 
+        iterator begin() {
+            return iterator(*this);
+        }
+        
         size_t size() {
             return size_;
         }
